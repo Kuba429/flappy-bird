@@ -34,7 +34,7 @@ pub fn handle_jump(
     mut query: Query<(&mut Transform, &mut Player), With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::Space) {
+    if keyboard_input.just_pressed(KeyCode::Space) || keyboard_input.just_pressed(KeyCode::Up) {
         let (mut transform, mut player) = query.get_single_mut().unwrap();
         player.falling_force = 5.0;
         transform.translation.y += player.falling_force;
