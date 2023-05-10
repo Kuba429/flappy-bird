@@ -1,12 +1,16 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
-pub struct Obstacle(pub f32);
+pub struct Obstacle;
 
 #[derive(Resource)]
-pub struct ObstacleCount(pub u8);
+pub struct LastObstacleDistance(pub f32);
 
-pub fn spawn_obstacle(mut commands: Commands, mut obstacle_count_res: ResMut<ObstacleCount>) {
+pub fn spawn_obstacle(mut commands: Commands, mut last_obstacle_res: ResMut<LastObstacleDistance>) {
+    let frequency = 2.0;
+    if last_obstacle_res.0 < crate::WINDOW_WIDTH / frequency {
+        return;
+    };
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_translation(Vec3 {
@@ -21,37 +25,24 @@ pub fn spawn_obstacle(mut commands: Commands, mut obstacle_count_res: ResMut<Obs
             },
             ..Default::default()
         },
-        Obstacle(0.0),
+        Obstacle,
     ));
-    obstacle_count_res.0 += 1;
+    last_obstacle_res.0 = 0.0;
 }
 
 pub fn move_obstacles(
     mut commands: Commands,
     mut query: Query<(&mut Transform, &Sprite, Entity), With<Obstacle>>,
+    mut last_obstacle_res: ResMut<LastObstacleDistance>,
     time: Res<Time>,
-    mut obstacle_count_res: ResMut<ObstacleCount>,
 ) {
-    let obstacle_count = obstacle_count_res.as_mut();
+    let distance = 100.0 * time.delta_seconds();
+    last_obstacle_res.0 += distance;
     query.for_each_mut(|(mut transform, sprite, entity)| {
         let sprite_width = sprite.custom_size.unwrap().x;
-        transform.translation.x -= 100.0 * time.delta_seconds();
+        transform.translation.x -= distance;
         if transform.translation.x < crate::WINDOW_WIDTH / -2.0 - sprite_width {
             commands.entity(entity).despawn();
-            obstacle_count.0 -= 1;
         };
     });
-}
-
-pub fn regulate_obstacle_count(
-    commands: Commands,
-    _query: Query<&Transform, With<Obstacle>>,
-    mut obstacle_count_res: ResMut<ObstacleCount>,
-) {
-    let target_obstacle_count = 1;
-    let obstacle_count = obstacle_count_res.as_mut();
-
-    if obstacle_count.0 < target_obstacle_count {
-        spawn_obstacle(commands, obstacle_count_res);
-    }
 }
