@@ -28,13 +28,17 @@ pub fn spawn_obstacle(mut commands: Commands, mut obstacle_count_res: ResMut<Obs
 
 pub fn move_obstacles(
     mut commands: Commands,
-    mut query: Query<(&mut Transform, &Obstacle), With<Obstacle>>,
+    mut query: Query<(&mut Transform, &Sprite, Entity), With<Obstacle>>,
     time: Res<Time>,
+    mut obstacle_count_res: ResMut<ObstacleCount>,
 ) {
-    query.for_each_mut(|(mut transform, obs)| {
+    let obstacle_count = obstacle_count_res.as_mut();
+    query.for_each_mut(|(mut transform, sprite, entity)| {
+        let sprite_width = sprite.custom_size.unwrap().x;
         transform.translation.x -= 100.0 * time.delta_seconds();
-        if transform.translation.x < crate::WINDOW_WIDTH / -2.0 {
-            todo!("Despawn the obstacle");
+        if transform.translation.x < crate::WINDOW_WIDTH / -2.0 - sprite_width {
+            commands.entity(entity).despawn();
+            obstacle_count.0 -= 1;
         };
     });
 }
