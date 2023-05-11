@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use rand::Rng;
 
 #[derive(Component)]
 pub struct Obstacle;
@@ -11,16 +12,23 @@ pub fn spawn_obstacle(mut commands: Commands, mut last_obstacle_res: ResMut<Last
     if last_obstacle_res.0 < crate::WINDOW_WIDTH / frequency {
         return;
     };
+    let gap = 200.0;
+    let y =
+        rand::thread_rng().gen_range((-crate::WINDOW_HEIGHT / 2.0)..(crate::WINDOW_HEIGHT / 2.0));
+    let first_height = (crate::WINDOW_HEIGHT / 2.0) - y - (gap / 2.0);
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_translation(Vec3 {
                 x: crate::WINDOW_WIDTH / 2.0 + 50.0,
-                y: 0.0,
+                y: (first_height / 2.0) + y + (gap / 2.0),
                 z: 0.0,
             }),
             sprite: Sprite {
                 color: Color::BLUE,
-                custom_size: Some(Vec2 { x: 50.0, y: 50.0 }),
+                custom_size: Some(Vec2 {
+                    x: 50.0,
+                    y: first_height,
+                }),
                 ..Default::default()
             },
             ..Default::default()
