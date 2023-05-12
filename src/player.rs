@@ -5,7 +5,8 @@ pub struct Player {
     pub falling_force: f32,
 }
 
-pub fn spawn_player(mut commands: Commands) {
+pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let texture_handle = asset_server.load("bird.png");
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_translation(Vec3 {
@@ -13,9 +14,12 @@ pub fn spawn_player(mut commands: Commands) {
                 y: 0.0,
                 z: 0.0,
             }),
+            texture: texture_handle,
             sprite: Sprite {
-                color: Color::RED,
-                custom_size: Some(Vec2 { x: 50.0, y: 50.0 }),
+                custom_size: Some(Vec2 {
+                    x: 17.0 * 3.0,
+                    y: 12.0 * 3.0,
+                }),
                 ..Default::default()
             },
             ..Default::default()
