@@ -5,8 +5,8 @@ use bevy::{
     window::{WindowPlugin, WindowResolution},
     DefaultPlugins,
 };
-use obstacle::{move_obstacles, spawn_obstacle, LastObstacleDistance};
-use player::{fall, handle_jump, keep_on_screen, spawn_player};
+use obstacle::ObstaclePlugin;
+use player::PlayerPlugin;
 
 pub const WINDOW_HEIGHT: f32 = 600.0;
 pub const WINDOW_WIDTH: f32 = 800.0;
@@ -24,12 +24,8 @@ fn main() {
         }))
         .insert_resource(ClearColor(Color::WHITE))
         .add_startup_system(spawn_camera)
-        // player
-        .add_startup_system(spawn_player)
-        .add_systems((handle_jump, fall, keep_on_screen))
-        // obstacles
-        .insert_resource(LastObstacleDistance(crate::WINDOW_WIDTH))
-        .add_systems((move_obstacles, spawn_obstacle))
+        .add_plugin(PlayerPlugin)
+        .add_plugin(ObstaclePlugin)
         .run();
 }
 

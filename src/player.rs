@@ -5,6 +5,14 @@ pub struct Player {
     pub falling_force: f32,
 }
 
+pub struct PlayerPlugin;
+impl Plugin for PlayerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(spawn_player)
+            .add_systems((handle_jump, fall, keep_on_screen));
+    }
+}
+
 pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     let texture_handle = asset_server.load("bird.png");
     commands.spawn((

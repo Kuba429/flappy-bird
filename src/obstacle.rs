@@ -7,6 +7,14 @@ pub struct Obstacle;
 #[derive(Resource)]
 pub struct LastObstacleDistance(pub f32);
 
+pub struct ObstaclePlugin;
+impl Plugin for ObstaclePlugin {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(LastObstacleDistance(crate::WINDOW_WIDTH))
+            .add_systems((move_obstacles, spawn_obstacle));
+    }
+}
+
 pub fn spawn_obstacle(mut commands: Commands, mut last_obstacle_res: ResMut<LastObstacleDistance>) {
     let frequency = 2.0;
     if last_obstacle_res.0 < crate::WINDOW_WIDTH / frequency {
@@ -25,7 +33,7 @@ pub fn spawn_obstacle(mut commands: Commands, mut last_obstacle_res: ResMut<Last
                 z: 0.0,
             }),
             sprite: Sprite {
-                color: Color::BLUE,
+                color: Color::GREEN,
                 custom_size: Some(Vec2 {
                     x: 50.0,
                     y: first_height,
@@ -50,23 +58,6 @@ pub fn spawn_obstacle(mut commands: Commands, mut last_obstacle_res: ResMut<Last
                     x: 50.0,
                     y: second_height,
                 }),
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-        Obstacle,
-    ));
-    //
-    commands.spawn((
-        SpriteBundle {
-            transform: Transform::from_translation(Vec3 {
-                x: crate::WINDOW_WIDTH / 2.0 + 50.0,
-                y,
-                z: 0.0,
-            }),
-            sprite: Sprite {
-                color: Color::RED,
-                custom_size: Some(Vec2 { x: 10.0, y: gap }),
                 ..Default::default()
             },
             ..Default::default()
