@@ -30,7 +30,7 @@ pub fn spawn_obstacle(
         (-crate::WINDOW_HEIGHT / 2.0 + gap + 10.0)..(crate::WINDOW_HEIGHT / 2.0 - gap - 10.0),
     );
     // texture dimensions
-    let texture_size = Vec2 { x: 80.0, y: 800.0 };
+    let texture_size = Vec2 { x: 78.0, y: 798.0 };
     let texture = asset_server.load("obstacle.png");
     commands.spawn((
         SpriteBundle {
