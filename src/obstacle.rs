@@ -15,7 +15,11 @@ impl Plugin for ObstaclePlugin {
     }
 }
 
-pub fn spawn_obstacle(mut commands: Commands, mut last_obstacle_res: ResMut<LastObstacleDistance>) {
+pub fn spawn_obstacle(
+    mut commands: Commands,
+    mut last_obstacle_res: ResMut<LastObstacleDistance>,
+    asset_server: Res<AssetServer>,
+) {
     let frequency = 1.5;
     let frequency_base = 800.0; //what i think is the optimal window_width
     if last_obstacle_res.0 < frequency_base / frequency {
@@ -27,6 +31,7 @@ pub fn spawn_obstacle(mut commands: Commands, mut last_obstacle_res: ResMut<Last
     );
     // texture dimensions
     let texture_size = Vec2 { x: 80.0, y: 800.0 };
+    let texture = asset_server.load("obstacle.png");
     commands.spawn((
         SpriteBundle {
             transform: Transform::from_translation(Vec3 {
@@ -34,8 +39,8 @@ pub fn spawn_obstacle(mut commands: Commands, mut last_obstacle_res: ResMut<Last
                 y: y + (gap / 2.0) + (texture_size.y / 2.0),
                 z: 0.0,
             }),
+            texture: texture.clone(),
             sprite: Sprite {
-                color: Color::DARK_GREEN,
                 custom_size: Some(texture_size),
                 ..Default::default()
             },
@@ -50,9 +55,10 @@ pub fn spawn_obstacle(mut commands: Commands, mut last_obstacle_res: ResMut<Last
                 y: y - (gap / 2.0) - (texture_size.y / 2.0),
                 z: 0.0,
             }),
+            texture,
             sprite: Sprite {
-                color: Color::DARK_GREEN,
                 custom_size: Some(texture_size),
+                flip_y: true,
                 ..Default::default()
             },
             ..Default::default()
