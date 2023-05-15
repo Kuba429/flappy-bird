@@ -2,13 +2,17 @@ use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct Player {
-    pub falling_force: f32,
+    pub velocity: f32,
 }
+
+#[derive(Resource)]
+pub struct PlayerRotation(f32);
 
 pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_player)
+        app.insert_resource(PlayerRotation { 0: 0.0 })
+            .add_startup_system(spawn_player)
             .add_systems((handle_jump, fall, keep_on_screen));
     }
 }
@@ -32,24 +36,50 @@ pub fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             ..Default::default()
         },
-        Player { falling_force: 0.0 },
+        Player { velocity: 0.0 },
     ));
 }
+// map function inspired by arduino
+fn map<T>(x: T, in_min: T, in_max: T, out_min: T, out_max: T) -> T
+where
+    T: std::ops::Add<Output = T>
+        + std::ops::Sub<Output = T>
+        + std::ops::Mul<Output = T>
+        + std::ops::Div<Output = T>
+        + Copy,
+{
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
-pub fn fall(mut query: Query<(&mut Transform, &mut Player), With<Player>>, time: Res<Time>) {
+pub fn fall(
+    mut query: Query<(&mut Transform, &mut Player), With<Player>>,
+    time: Res<Time>,
+    mut rotation: ResMut<PlayerRotation>,
+) {
     let (mut transform, mut player) = query.get_single_mut().unwrap();
-    player.falling_force -= time.delta_seconds() * 10.0;
-    transform.translation.y += player.falling_force;
+    player.velocity -= time.delta_seconds() * 10.0;
+    if player.velocity < -5.0 {
+        player.velocity = -5.0;
+    }
+    transform.translation.y += player.velocity;
+    transform.rotate_z(-rotation.0);
+    let degrees = map(player.velocity, -5.0, 5.0, -40.0, 40.0);
+    rotation.0 = (degrees).to_radians();
+    transform.rotate_z(rotation.0);
 }
 
 pub fn handle_jump(
     mut query: Query<(&mut Transform, &mut Player), With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
+    mut rotation: ResMut<PlayerRotation>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) || keyboard_input.just_pressed(KeyCode::Up) {
         let (mut transform, mut player) = query.get_single_mut().unwrap();
-        player.falling_force = 5.0;
-        transform.translation.y += player.falling_force;
+        player.velocity = 5.0;
+        transform.translation.y += player.velocity;
+        transform.rotate_z(-rotation.0);
+        rotation.0 = 90.0_f32.to_radians();
+        transform.rotate_z(rotation.0);
     }
 }
 
