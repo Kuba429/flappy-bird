@@ -24,8 +24,8 @@ fn main() {
         }))
         .insert_resource(ClearColor(Color::WHITE))
         .add_startup_system(spawn_camera)
-        .add_plugin(PlayerPlugin)
         .add_plugin(ObstaclePlugin)
+        .add_plugin(PlayerPlugin)
         .run();
 }
 

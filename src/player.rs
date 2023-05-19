@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::obstacle::Obstacle;
+
 #[derive(Component)]
 pub struct Player {
     pub velocity: f32,
@@ -13,7 +15,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(PlayerRotation { 0: 0.0 })
             .add_startup_system(spawn_player)
-            .add_systems((handle_jump, fall, keep_on_screen));
+            .add_systems((handle_jump, fall, keep_on_screen, check_for_collision));
     }
 }
 
@@ -96,4 +98,38 @@ pub fn keep_on_screen(mut query: Query<(&mut Transform, &Sprite), With<Player>>)
     if transform.translation.y < bottom_bound {
         transform.translation.y = bottom_bound;
     }
+}
+
+pub fn check_for_collision(
+    player_query: Query<(&Transform, &Sprite), With<Player>>,
+    obstacle_query: Query<(&Transform, &Sprite), With<Obstacle>>,
+) {
+    let (player_transform, player_sprite) = player_query.get_single().unwrap();
+    let player_size = player_sprite.custom_size.unwrap();
+    let player_translation = player_transform.translation;
+    obstacle_query
+        .iter()
+        .for_each(|(obstacle_transform, obstacle_sprite)| {
+            let obstacle_translation = obstacle_transform.translation;
+            let obstacle_size = obstacle_sprite.custom_size.unwrap();
+
+            if !(player_translation.x + (player_size.x / 2.0)
+                > obstacle_translation.x - (obstacle_size.x / 2.0)
+                && player_translation.x - (player_size.x / 2.0)
+                    < obstacle_translation.x + (obstacle_size.x / 2.0))
+            {
+                // not collision on x axis
+                return;
+            }
+            if !(player_translation.y + (player_size.y / 2.0)
+                >= obstacle_translation.y - (obstacle_size.y / 2.0)
+                && player_translation.y - (player_size.y / 2.0)
+                    <= obstacle_translation.y + (obstacle_size.y / 2.0))
+            {
+                // no collision on y axis
+                return;
+            }
+            // collision
+            //TODO
+        })
 }
