@@ -32,34 +32,68 @@ fn toggle_state(
 }
 
 #[derive(Component)]
-struct StateInfo;
+struct StateInfoTop;
+#[derive(Component)]
+struct StateInfoBottom;
 
 fn spawn_game_state_info(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn((
-        TextBundle::from_section(
-            "Test",
-            TextStyle {
-                color: Color::BLACK,
-                font_size: 100.0,
-                font: asset_server.load("Silkscreen-Regular.ttf"),
+    let font = asset_server.load("Silkscreen-Regular.ttf");
+    commands
+        .spawn(NodeBundle {
+            background_color: BackgroundColor(Color::BLUE),
+            style: Style {
+                position_type: PositionType::Absolute,
+                position: UiRect {
+                    right: Val::Percent(50.0),
+                    left: Val::Percent(50.0),
+                    ..Default::default()
+                },
+                align_items: AlignItems::Center,
+                flex_direction: FlexDirection::Column,
+                align_self: AlignSelf::Center,
                 ..Default::default()
             },
-        )
-        .with_text_alignment(TextAlignment::Center)
-        .with_style(Style {
-            align_self: AlignSelf::Center,
-            justify_content: JustifyContent::Center,
-            ..default()
-        }),
-        StateInfo,
-    ));
+            ..Default::default()
+        })
+        .with_children(|parent| {
+            parent.spawn((
+                TextBundle::from_section(
+                    "",
+                    TextStyle {
+                        font_size: 130.0,
+                        color: Color::BLACK,
+                        font: font.clone(),
+                        ..Default::default()
+                    },
+                )
+                .with_text_alignment(TextAlignment::Center),
+                StateInfoTop,
+            ));
+            parent.spawn((
+                TextBundle::from_section(
+                    "",
+                    TextStyle {
+                        font_size: 60.0,
+                        color: Color::BLACK,
+                        font,
+                        ..Default::default()
+                    },
+                ),
+                StateInfoBottom,
+            ));
+        });
 }
 
-fn update_text(mut query: Query<&mut Text, With<StateInfo>>, state: Res<State<GameState>>) {
-    let new_string = match state.0 {
-        GameState::Running => "",
-        GameState::Pause => "Paused",
-        GameState::GameOver => "Game Over",
+fn update_text(
+    mut query_top: Query<&mut Text, (With<StateInfoTop>, Without<StateInfoBottom>)>,
+    mut query_bottom: Query<&mut Text, (With<StateInfoBottom>, Without<StateInfoTop>)>,
+    state: Res<State<GameState>>,
+) {
+    let (top, bottom) = match state.0 {
+        GameState::Running => ("", ""),
+        GameState::Pause => ("Paused", "Press Escape to resume"),
+        GameState::GameOver => ("Game Over", "Press Escape to restart"),
     };
-    query.get_single_mut().unwrap().sections[0].value = new_string.to_string();
+    query_top.get_single_mut().unwrap().sections[0].value = top.to_string();
+    query_bottom.get_single_mut().unwrap().sections[0].value = bottom.to_string();
 }
