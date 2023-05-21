@@ -15,12 +15,10 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(PlayerRotation { 0: 0.0 })
             .add_startup_system(spawn_player)
-            .add_systems((
-                handle_jump.run_if(in_state(GameState::Running)),
-                fall.run_if(in_state(GameState::Running)),
-                keep_on_screen.run_if(in_state(GameState::Running)),
-                check_for_collision.run_if(in_state(GameState::Running)),
-            ));
+            .add_systems(
+                (handle_jump, fall, keep_on_screen, check_for_collision)
+                    .in_set(OnUpdate(GameState::Running)),
+            );
     }
 }
 

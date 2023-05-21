@@ -13,10 +13,7 @@ pub struct ObstaclePlugin;
 impl Plugin for ObstaclePlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(LastObstacleDistance(crate::WINDOW_WIDTH))
-            .add_systems((
-                move_obstacles.run_if(in_state(GameState::Running)),
-                spawn_obstacle.run_if(in_state(GameState::Running)),
-            ));
+            .add_systems((move_obstacles, spawn_obstacle).in_set(OnUpdate(GameState::Running)));
     }
 }
 
