@@ -1,5 +1,7 @@
 mod obstacle;
 mod player;
+mod state;
+
 use bevy::{
     prelude::*,
     window::{WindowPlugin, WindowResolution},
@@ -7,12 +9,14 @@ use bevy::{
 };
 use obstacle::ObstaclePlugin;
 use player::PlayerPlugin;
+use state::{GameState, StatePlugin};
 
 pub const WINDOW_HEIGHT: f32 = 600.0;
 pub const WINDOW_WIDTH: f32 = 800.0;
 
 fn main() {
     App::new()
+        .add_state::<GameState>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(bevy::window::Window {
                 title: "Flappy Bird".to_string(),
@@ -24,6 +28,7 @@ fn main() {
         }))
         .insert_resource(ClearColor(Color::WHITE))
         .add_startup_system(spawn_camera)
+        .add_plugin(StatePlugin)
         .add_plugin(ObstaclePlugin)
         .add_plugin(PlayerPlugin)
         .run();

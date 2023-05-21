@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use rand::Rng;
 
+use crate::GameState;
+
 #[derive(Component)]
 pub struct Obstacle;
 
@@ -11,7 +13,10 @@ pub struct ObstaclePlugin;
 impl Plugin for ObstaclePlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(LastObstacleDistance(crate::WINDOW_WIDTH))
-            .add_systems((move_obstacles, spawn_obstacle));
+            .add_systems((
+                move_obstacles.run_if(in_state(GameState::Running)),
+                spawn_obstacle.run_if(in_state(GameState::Running)),
+            ));
     }
 }
 
