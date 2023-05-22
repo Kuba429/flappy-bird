@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{obstacle::Obstacle, GameState};
+use crate::{obstacle::Obstacle, GameReset, GameState};
 
 #[derive(Component)]
 pub struct Player {
@@ -18,7 +18,8 @@ impl Plugin for PlayerPlugin {
             .add_systems(
                 (handle_jump, fall, keep_on_screen, check_for_collision)
                     .in_set(OnUpdate(GameState::Running)),
-            );
+            )
+            .add_system(player_reset_game);
     }
 }
 
@@ -136,4 +137,13 @@ pub fn check_for_collision(
             // collision
             commands.insert_resource(NextState(Some(GameState::GameOver)))
         })
+}
+
+fn player_reset_game(
+    mut ev_game_reset: EventReader<GameReset>,
+    mut query: Query<&mut Transform, With<Player>>,
+) {
+    for _ev in ev_game_reset.iter() {
+        query.get_single_mut().unwrap().translation.y = 0.0;
+    }
 }

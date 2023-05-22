@@ -14,9 +14,12 @@ use state::{GameState, StatePlugin};
 pub const WINDOW_HEIGHT: f32 = 600.0;
 pub const WINDOW_WIDTH: f32 = 800.0;
 
+pub struct GameReset{}
+
 fn main() {
     App::new()
         .add_state::<GameState>()
+        .add_event::<GameReset>()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(bevy::window::Window {
                 title: "Flappy Bird".to_string(),
@@ -37,4 +40,3 @@ fn main() {
 fn spawn_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
-

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::GameState;
+use crate::{GameReset, GameState};
 
 #[derive(Component)]
 pub struct Obstacle;
@@ -13,7 +13,8 @@ pub struct ObstaclePlugin;
 impl Plugin for ObstaclePlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(LastObstacleDistance(crate::WINDOW_WIDTH))
-            .add_systems((move_obstacles, spawn_obstacle).in_set(OnUpdate(GameState::Running)));
+            .add_systems((move_obstacles, spawn_obstacle).in_set(OnUpdate(GameState::Running)))
+            .add_system(obstacle_reset_game);
     }
 }
 
@@ -85,4 +86,16 @@ pub fn move_obstacles(
             commands.entity(entity).despawn();
         };
     });
+}
+
+pub fn obstacle_reset_game(
+    mut commands: Commands,
+    mut ev_game_reset: EventReader<GameReset>,
+    mut last_obstacle_res: ResMut<LastObstacleDistance>,
+    query: Query<Entity, With<Obstacle>>,
+) {
+    for _ev in &mut ev_game_reset {
+        query.iter().for_each(|e| commands.entity(e).despawn());
+        last_obstacle_res.0 = crate::WINDOW_WIDTH; // TODO
+    }
 }

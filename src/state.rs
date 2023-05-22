@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::GameReset;
+
 #[derive(States, Debug, Clone, Copy, Eq, PartialEq, Hash, Default)]
 pub enum GameState {
     #[default]
@@ -12,7 +14,7 @@ pub struct StatePlugin;
 impl Plugin for StatePlugin {
     fn build(&self, app: &mut App) {
         app.add_state::<GameState>()
-            .add_system(toggle_state.run_if(not(in_state(GameState::GameOver))))
+            .add_system(toggle_state)
             .add_system(update_text)
             .add_startup_system(spawn_game_state_info);
     }
@@ -20,6 +22,7 @@ impl Plugin for StatePlugin {
 fn toggle_state(
     mut commands: Commands,
     state: Res<State<GameState>>,
+    mut ev_writer: EventWriter<GameReset>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     if !keyboard_input.just_pressed(KeyCode::P) && !keyboard_input.just_pressed(KeyCode::Escape) {
@@ -27,7 +30,11 @@ fn toggle_state(
     }
     commands.insert_resource(NextState(Some(match state.0 {
         GameState::Running => GameState::Pause,
-        _ => GameState::Running,
+        GameState::Pause => GameState::Running,
+        GameState::GameOver => {
+            ev_writer.send(GameReset {});
+            GameState::Running
+        }
     })))
 }
 
