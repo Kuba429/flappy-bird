@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::{GameReset, GameState};
+use crate::{GameReset, GameState, WINDOW_WIDTH};
 
 #[derive(Component)]
 pub struct Obstacle;
@@ -96,6 +96,6 @@ pub fn obstacle_reset_game(
 ) {
     for _ev in &mut ev_game_reset {
         query.iter().for_each(|e| commands.entity(e).despawn());
-        last_obstacle_res.0 = crate::WINDOW_WIDTH; // TODO
+        last_obstacle_res.0 = WINDOW_WIDTH / 2.0;
     }
 }
